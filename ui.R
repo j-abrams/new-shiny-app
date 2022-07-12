@@ -17,7 +17,7 @@ ui <- dashboardPage(
           choices = c("Actual", "Projection"),
           selected = c("Actual", "Projection"),
           shape = "round",
-          inline = T
+          inline = F
         ),
       ),
       
@@ -31,10 +31,10 @@ ui <- dashboardPage(
                     timeFormat = "%b-%y")
       ),
       column(12,
-        textOutput("text"),
+        plotOutput("plot"),
       ),  
       column(12,
-        tableOutput("table"),
+        tableOutput("table")
       )
     )
   )

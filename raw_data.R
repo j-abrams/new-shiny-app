@@ -1,24 +1,26 @@
-library(tidyverse)
+
+#library(tidyverse)
 library(readxl)
 library(lubridate)
+library(dplyr)
 
 rm(list=ls())
 
-Data1819 <- read.csv("C:\\Users\\GillHolland\\OneDrive - Hartley McMaster Ltd\\HMCTS data\\HMCTS_raw_data_for_Apr18_to_Apr19.csv")
 
-Data1920 <- read.csv("C:\\Users\\GillHolland\\OneDrive - Hartley McMaster Ltd\\HMCTS data\\HMCTS_raw_data_for_Apr19_to_Apr20.csv")
+Data1819 <- read.csv(here("Input data/HMCTS_raw_data_for_Apr18_to_Apr19.csv"))
 
-Data2021 <- read.csv("C:\\Users\\GillHolland\\OneDrive - Hartley McMaster Ltd\\HMCTS data\\20210601_HMCTS_raw_data_for_Apr20_to_Apr21.csv")
+Data1920 <- read.csv(here("Input data/HMCTS_raw_data_for_Apr19_to_Apr20.csv"))
 
-Data2122 <- read_xlsx("C:\\Users\\GillHolland\\OneDrive - Hartley McMaster Ltd\\HMCTS data\\HMCTS_Management_Information_April_2021_to_April_2022.xlsx")
+Data2021 <- read.csv(here("Input data/20210601_HMCTS_raw_data_for_Apr20_to_Apr21.csv"))
 
-
+Data2122 <- read_xlsx(here("Input data/HMCTS_Management_Information_April_2021_to_April_2022.xlsx"), sheet = 1) %>%
+  mutate(MONTH = gsub("2022", "01", MONTH))
 #Create a date field
 
 Data1819$Date <- as.Date(Data1819$MONTH, format="%d-%b-%y")
 Data1920$Date <- as.Date(Data1920$MONTH, format="%d-%b-%y")
 Data2021$Date <- as.Date(Data2021$MONTH, format="%d-%b-%y")
-Data2122$Date <- as.Date(Data2122$MONTH, format="%d-%b-%y")
+Data2122$Date <- as.Date(Data2122$MONTH, format="%d-%m-%y")
 
 
 #Extract date and immigration data
@@ -48,7 +50,7 @@ ImmigrationData <- rbind(Data1819,Data1920, Data2021, Data2122)
 # add month year format e.g. Nov-21
 #ImmigrationData$Date <- format(ImmigrationData$Date, format="%b-%y")
 
-ImmigrationData <- ImmigrationData %>%
-  mutate(Date = format(Date, format="%b-%y") )
+#ImmigrationData <- ImmigrationData %>%
+#  mutate(Date = format(Date, format="%b-%y") )
 
-
+rm("Data1819", "Data1920", "Data2021", "Data2122")
