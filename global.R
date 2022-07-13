@@ -22,6 +22,8 @@ library(shinyjs)
 library(plotly)
 library(ggplot2)
 
+library(fontawesome)
+
 #library(shinycssloaders)
 #library(shinyjs)
 
@@ -57,7 +59,7 @@ jdata_new <- ImmigrationData %>%
   arrange(Date)
 
 
-
+last_outstanding_val <- jdata_new$OutstandingCases[nrow(jdata_new)]
 
 
 

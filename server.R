@@ -38,7 +38,6 @@ if (interactive()) {
         mutate(Receipts = coalesce(Receipts.x, Receipts.y)) %>% 
         select(c(names(jdata_new)))
       
-      #shinyjs::disable("file1")
       
     })
     
@@ -60,6 +59,25 @@ if (interactive()) {
       
     })
     
+    observeEvent(input$numeric, {
+      
+      print(input$numeric)
+      
+      req(input$file1)
+      req(input$file2)
+      
+      vals$jdata <- vals$jdata %>%
+        dplyr::mutate(OutstandingCases = replace_na(OutstandingCases, 0),
+                      diff = ifelse(Actuals == "Projection",
+                                     Receipts - (Disposals * input$numeric), 
+                                    0),
+                      OutstandingCases = ifelse(Actuals == "Projection",
+                                                cumsum(diff) + last_outstanding_val, 
+                                                OutstandingCases)) %>%
+        select(-diff)
+                        
+      
+    })
     
     observeEvent(input$checkbox1, {
     
@@ -84,13 +102,9 @@ if (interactive()) {
     })
     
     output$table <- renderTable({
-        
-      if (nrow(jdata2()) == 0) {
-        "Please select Actuals or Projections from above"
-      } else {
-        jdata2() %>%
-          mutate(Date = format(Date, "%b-%y")) 
-      }
+      
+      jdata2() %>%
+        mutate(Date = format(Date, "%b-%y"))
       
     })
     
