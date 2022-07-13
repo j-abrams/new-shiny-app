@@ -4,9 +4,12 @@ if (interactive()) {
   
   server <- function(input, output, session) {
     
+    vals <- reactiveValues(jdata = jdata_new)
+    
     
     jdata <- reactive({
-      jdata_new %>%
+      vals$jdata %>%
+        # Filter for actuals or projections based on contents of checkbox
         filter(Actuals %in% input$checkbox1)
     })
     
@@ -18,29 +21,66 @@ if (interactive()) {
     })
     
     
+    
+    observeEvent(input$file1, {
+      
+      receipt_data <- read.csv(input$file1$datapath) 
+      
+      req("Receipts" %in% names(receipt_data))
+      
+      receipt_data <- receipt_data %>%
+        dplyr::rename("Date" = 1) %>%
+        dplyr::mutate(Date = as.Date(Date, "%d/%m/%Y"),
+               Actuals = "Projection") 
+      
+      vals$jdata <- vals$jdata %>%
+        full_join(receipt_data, by = c("Date", "Actuals")) %>%
+        mutate(Receipts = coalesce(Receipts.x, Receipts.y)) %>% 
+        select(c(names(jdata_new)))
+      
+      #shinyjs::disable("file1")
+      
+    })
+    
+    observeEvent(input$file2, {
+      
+      disposal_data <- read.csv(input$file2$datapath) 
+      
+      req("Disposals" %in% names(disposal_data))
+      
+      disposal_data <- disposal_data %>%
+        dplyr::rename("Date" = 1) %>%
+        dplyr::mutate(Date = as.Date(Date, "%d/%m/%Y"),
+                      Actuals = "Projection") 
+      
+      vals$jdata <- vals$jdata  %>%
+        full_join(disposal_data, by = c("Date", "Actuals"))  %>%
+        mutate(Disposals = coalesce(Disposals.x, Disposals.y)) %>% 
+        select(c(names(jdata_new)))
+      
+    })
+    
+    
     observeEvent(input$checkbox1, {
     
-     
+      new_limits <- jdata()$Date
       
-      # Don't break the slider input
-      req(length(input$checkbox1) > 0)
-      updateSliderInput(session, "slider1", 
-                        label = "Date:",
-                        min = as.Date(min(jdata()$Date), "%b-%y"),
-                        max = as.Date(max(jdata()$Date), "%b-%y"),
-                        value = c(as.Date(min(jdata()$Date), "%b-%y"),
-                                  as.Date(max(jdata()$Date), "%b-%y")),
+      updateSliderInput(session, "slider1",
+                        min = as.Date(min(new_limits), "%b-%y"),
+                        max = as.Date(max(new_limits), "%b-%y"),
+                        value = c(as.Date(min(new_limits), "%b-%y"),
+                                  as.Date(max(new_limits), "%b-%y")),
                         timeFormat = "%b-%y")
       
-    }, ignoreInit = TRUE, ignoreNULL = FALSE )
+    }, ignoreInit = TRUE, ignoreNULL = T )
     
-    
-    output$plot <- renderPlot({
-      
-      req(jdata2())
-      
-      ggplot(jdata2(), mapping = aes(x = Date, y = OutstandingCases)) +
-        geom_line()
+    output$plot <- renderPlotly({
+      req(nrow(jdata2()) > 0 )
+      ggplotly(
+        ggplot(jdata2(), mapping = aes(x = Date, y = OutstandingCases)) +
+          geom_line() +
+          ggtitle("Time series for total Outstanding Cases by month")
+      )
     })
     
     output$table <- renderTable({
@@ -54,9 +94,8 @@ if (interactive()) {
       
     })
     
-    
   }
-  
+
 }
 
 

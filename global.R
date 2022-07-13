@@ -9,12 +9,15 @@
 #renv::install("lubridate")
 #renv::install("here")
 
+#renv::install("shinyjs")
+
 library(dplyr)
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(lubridate)
 library(here)
+library(shinyjs)
 
 library(plotly)
 library(ggplot2)
@@ -27,18 +30,20 @@ source(here("raw_data.R"))
 
 launch_time <- format(Sys.time(), tz="Europe/London")
 
-forecast_start_date <- "2022-02-01"
+forecast_start_date <- "2022-05-01"
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 
-jdata <- read.csv("Input data/jdata2.csv") %>%
-  mutate(Date = paste0("01-", Date)) %>%
-  mutate(Date = as.Date(Date, format = "%d-%b-%y")) %>%
-  # Add flag to distinguish between actuals and projections
-  mutate(Actuals = "Projection") %>%
-  filter(Date %!in% ImmigrationData$Date ) %>%
-  select(Date, Receipts, Disposals, OutstandingCases, Actuals)
+
+
+# jdata <- read.csv("Input data/jdata2.csv") %>%
+#   mutate(Date = paste0("01-", Date)) %>%
+#   mutate(Date = as.Date(Date, format = "%d-%b-%y")) %>%
+#   # Add flag to distinguish between actuals and projections
+#   mutate(Actuals = "Projection") %>%
+#   filter(Date %!in% ImmigrationData$Date ) %>%
+#   select(Date, Receipts, Disposals, OutstandingCases, Actuals)
 
 
 jdata_new <- ImmigrationData %>%
@@ -48,7 +53,7 @@ jdata_new <- ImmigrationData %>%
   dplyr::rename("Receipts" = "IA_RECEIPTS",
                 "Disposals" = "IA_DISPOSALS",
                 "OutstandingCases" = "IA_OUTSTANDING") %>%
-  bind_rows(jdata) %>%
+  #bind_rows(jdata) %>%
   arrange(Date)
 
 
