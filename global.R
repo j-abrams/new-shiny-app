@@ -10,22 +10,26 @@
 #renv::install("here")
 
 #renv::install("shinyjs")
+#renv::install("rhandsontable")
 
 library(dplyr)
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
-library(lubridate)
 library(here)
 library(shinyjs)
-
-library(plotly)
 library(ggplot2)
-
 library(fontawesome)
+
+library(rhandsontable)
+library(lubridate)
 
 #library(shinycssloaders)
 #library(shinyjs)
+
+
+#renv::install("powerjoin")
+library(powerjoin)
 
 
 source(here("raw_data.R"))
@@ -38,14 +42,18 @@ forecast_start_date <- "2022-05-01"
 
 
 
+sitting_days_lookup <- read_xlsx(here("Input data/monthly_share.xlsx"), sheet = "lookup")
+sitting_days_total <- read_xlsx(here("Input data/monthly_share.xlsx"), sheet = "sitting_days")
+sitting_days_df <- read_xlsx(here("Input data/monthly_share.xlsx"), sheet = "monthly_share")
 
-# jdata <- read.csv("Input data/jdata2.csv") %>%
-#   mutate(Date = paste0("01-", Date)) %>%
-#   mutate(Date = as.Date(Date, format = "%d-%b-%y")) %>%
-#   # Add flag to distinguish between actuals and projections
-#   mutate(Actuals = "Projection") %>%
-#   filter(Date %!in% ImmigrationData$Date ) %>%
-#   select(Date, Receipts, Disposals, OutstandingCases, Actuals)
+sd_join <- sitting_days_lookup %>%
+  dplyr::rename("Period" = "Lookup") %>%
+  
+  left_join(sitting_days_df, by = "Month") %>%
+  filter(Month >= forecast_start_date)
+  
+
+
 
 
 jdata_new <- ImmigrationData %>%
@@ -56,12 +64,15 @@ jdata_new <- ImmigrationData %>%
                 "Disposals" = "IA_DISPOSALS",
                 "OutstandingCases" = "IA_OUTSTANDING") %>%
   #bind_rows(jdata) %>%
-  arrange(Date)
+  arrange(Date) %>%
+  mutate(`Sitting Days` = NA) %>%
+  select(Date, Receipts, `Sitting Days`, Disposals, OutstandingCases, Actuals)
 
 
 last_outstanding_val <- jdata_new$OutstandingCases[nrow(jdata_new)]
 
 
+level_test <- as.factor(c("Actual", "Projection"))
 
 
 
