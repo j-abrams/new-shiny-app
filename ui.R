@@ -45,39 +45,52 @@ ui <- dashboardPage(
                     timeFormat = "%b-%y"
         ),
         
-        div(style = "height:50px", "Date range to display in tabular and plot outputs"),
+        div(style = "height:40px", "Date range to display in tabular and plot outputs"),
         
         # Checkbox for selecting actuals, projections or both
         prettyCheckboxGroup(
           inputId = "checkbox1",
           label = "Actuals and Projections",
-          choices = c("Actual", "Projection"),
+          choices = c("Actual"),
           selected = c("Actual"),
-          shape = "round",
-          inline = F,
-          icon = icon("bitcoin")
+          inline = T
         ),
         
-        div(style = "height:50px", "Select whether to display Actuals, Projections or both"),
+        div(style = "height:40px", "Select whether to display Actuals, Projections or both"),
         
         pickerInput(
           inputId = "picker1",
-          label = "hi",
+          label = "Plotting variable",
           choices = c("Receipts", "Disposals", "OutstandingCases"),
           selected = "OutstandingCases",
           multiple = T
-        )
+        ),
+        
+        div(style = "height:40px", "Use dropdown to decide which variable / variables to plot"),
+        
+        knobInput(
+          inputId = "knob1",
+          label = "Confidence Interval",
+          value = 10, min = 0, max = 20,
+          height = "85px",
+          #height = "95px",
+          #angleArc = 180, angleOffset = 270,
+          fgColor = "cornflowerblue",
+          post = "%"
+        ),
+        
+        div(style = "height:40px", "Adjust confidence interval with this widget")
+        
     
       ),
       column(class = "myCol1",
         width = 8,
         div(style = "height:20px"),
         plotlyOutput("plot")
-        #dataTableOutput("table")
       ),
       
       tags$head(tags$style("
-        .myCol1{height:450px;background-color: LightPink;}")
+        .myCol1{height:600px;background-color: LightPink;}")
       ),
       
       
@@ -103,14 +116,26 @@ ui <- dashboardPage(
                         icon = icon("percent")
         ),
         
-        div(style = "height:50px", "Disposal rate for converting sitting days to disposals"),
+        div(style = "height:40px", "Disposal rate for converting sitting days to disposals"),
         
-        rHandsontableOutput("hot")
+        rHandsontableOutput("hot", height = "32%"),
+        
+        div(style = "height:40px", "Disposal rate for converting sitting days to disposals"),
+        
+        downloadButton(
+          "actionbutton1",
+          label = "Export .csv",
+          width = "50%", 
+          height = "100px",
+          icon = icon("download")
+        ),
+        div(style = "height:20px"),
+        div(style = "height:40px", "Export underlyiing data into an Excel csv file"),
              
       ),
       
       tags$head(tags$style("
-        .myCol2{height:450px;background-color: LightBlue;}")
+        .myCol2{height:600px;background-color: LightBlue;}")
       ),
       
       

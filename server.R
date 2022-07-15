@@ -19,10 +19,11 @@ if (interactive()) {
     # Integrate the date slider functionality
     jdata2 <- reactive({
       jdata() %>%
-      # Use floor date to filter on Date
-      filter(Date >= floor_date(input$slider1[1], unit = "months") &
-               Date <= floor_date(input$slider1[2], unit = "months"))
+        # Use floor date to filter on Date
+        filter(Date >= floor_date(input$slider1[1], unit = "months") &
+                 Date <= floor_date(input$slider1[2], unit = "months"))
     })
+    
     
     # Call this function to update our reactive plot in the renderPlotly command
     jdata_selected <- reactive({
@@ -30,8 +31,14 @@ if (interactive()) {
         pivot_longer(c("Receipts", "Disposals", "OutstandingCases"),
                      names_to = "Category", values_to = "Total") %>%
         filter(Category %in% input$picker1) %>%
-        mutate(Total2 = ifelse(Actuals == "Actual", Total, NA)  )
+        mutate(Total2 = ifelse(Actuals == "Actual", Total, NA)) %>%
+        mutate(`Upper Interval` = ifelse(Actuals == "Projection", 
+                                         Total * ((100 + input$knob1) / 100), NA)) %>%
+        mutate(`Lower Interval` = ifelse(Actuals == "Projection", 
+                                         Total * ((100 - input$knob1) / 100), NA)) 
     })
+    
+    
         
     
     # Calculate OutstandingCases from Receipts and Sitting Days
@@ -56,6 +63,15 @@ if (interactive()) {
       # Check to see whether the right receipts file has been uploaded
       req("Receipts" %in% names(receipt_data))
       
+      # Update options and selections
+      updatePrettyCheckboxGroup(
+        session, 
+        "checkbox1",
+        choices = c("Actual", "Projection"),
+        selected = c("Actual", "Projection"),
+        inline = T
+      )
+      
       receipt_data <- receipt_data %>%
         dplyr::rename("Date" = 1) %>%
         dplyr::mutate(Date = as.Date(Date, "%d/%m/%Y"),
@@ -68,29 +84,42 @@ if (interactive()) {
         dplyr::select(names(jdata_new)) 
         
       vals$jdata <- jdata_update()
+
       
     })
     
     # Update slider input limits when input for checkbox1 changes
-    observeEvent(input$checkbox1, {
     
+    observeEvent(input$checkbox1, {
+
+      # This refreshes twice when called, once to update the slider, once to update plot
+      # Investigate how to use isolate to counter this
+      
       new_limits <- jdata()$Date
+
       min <- as.Date(min(new_limits), format = "%b-%y")
       max <- as.Date(max(new_limits), format = "%b-%y")
+      
+      #freezeReactiveValue(input, "slider1")
       
       updateSliderInput(session, "slider1",
                         min = min,
                         max = max,
                         value = c(min, max),
                         timeFormat = "%b-%y")
-      
+
     }, ignoreNULL = T )
+    
     
     
     # Re-assign vals$jdata when input$numeric changes - 
     # new disposal rates will result in updated Disposal figures
     observeEvent(input$numeric, {
+      
+      req(input$file1)
+      
       vals$jdata <- jdata_update()
+      
     })
     
     # rhandsontable output - configure which cols are and are not read only
@@ -103,56 +132,86 @@ if (interactive()) {
     # call jdata_update() when something changes in "input$hot"
     observeEvent(input$hot, {
       
+      #req(input$file1)
+      
       # hot_to_r function convert rhandsontable to an r dataframe
       df <- hot_to_r(input$hot) %>%
         right_join(sd_join, by = "Period") %>%
         dplyr::mutate(`Sitting Days` = `Total Sitting Days` * `Monthly share pa`) %>%
-        select(Date = Month, `Sitting Days`) %>%
-        filter(Date <= "2023-01-01")
+        select(Date = Month, `Sitting Days`) #%>%
+        #filter(Date <= "2023-01-01")
       
       # power_full_join : A full and right join rolled into one
       vals$jdata <- vals$jdata %>%
         power_full_join(df, by = "Date", conflict = coalesce_yx) %>%
         mutate(Actuals = ifelse(Date < forecast_start_date, Actuals, "Projection")) %>%
-        arrange(Date)
+        arrange(Date) %>%
+        select(names(jdata_new))
         
       vals$jdata <- jdata_update()
       
     })
     
     
+    output$actionbutton1 <- downloadHandler(
+      filename = function() {
+        paste("data-", Sys.Date(), ".csv", sep="")
+      },
+      content = function(file) {
+        write.csv(vals$jdata, file)
+      }
+    )
+    
+    
     # renderPlotly - plot updates dynamically subject to contents of the picker1 input
     output$plot <- renderPlotly({
       
       # Only render when this criteria is met
+      req(input$hot)
       req(length(input$picker1) > 0)
-      req(nrow(jdata2() %>% filter(!is.na(OutstandingCases))) > 0 )
+      req(length(input$checkbox1) > 0)
+      
       
       #print(factor(jdata_selected()$Actuals, levels = level_test))
       
       # Line graph
+      
       p <- ggplot(jdata_selected(), 
-                  aes(x = Date)) +
+                aes(x = Date)) +
         geom_line(aes(y = Total, colour = factor(Category), 
                       linetype = factor(Actuals, levels = level_test)), 
                   size = 1) +
         ggtitle("Time series for total Outstanding Cases by month")
-      
+    
       # Add bar graph, only in the case where one item is selected from the picker
-      if (length(input$picker1) == 1 & 
-          nrow(jdata_selected() %>% filter(Actuals == "Actual")) > 0 ) {
-        p <- p +
-          geom_bar(aes(y = Total2), stat = "identity", fill = "cadetblue")
+      if (length(input$picker1) == 1) {
+        if (nrow(jdata_selected() %>% filter(Actuals == "Actual")) > 0 ) {
+          p <- p +
+            geom_bar(aes(y = Total2), stat = "identity", fill = "cadetblue")
+        }
+        
+        if ("Projection" %in% jdata_selected()$Actuals) {
+          p <- p +
+            geom_line(aes(y = `Upper Interval`), color = "cornflowerblue", linetype = "dashed") +
+            geom_line(aes(y = `Lower Interval`), color = "cornflowerblue", linetype = "dashed")
+        }
       }
       
+      
+      
       # Convert ggplot object to a plotly object
-      ggplotly(p)
+      #suppressWarnings(
+        # height = "550px"
+        ggplotly(p, height = 550)
+      #)
       
     })
     
     
     # renderTable - updates dynamically 
     output$table <- renderTable({
+      
+      req(input$hot)
       
       jdata2() %>%
         mutate(Date = format(Date, "%b-%y"))

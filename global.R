@@ -71,7 +71,6 @@ jdata_new <- ImmigrationData %>%
 
 last_outstanding_val <- jdata_new$OutstandingCases[nrow(jdata_new)]
 
-
 level_test <- as.factor(c("Actual", "Projection"))
 
 
