@@ -178,10 +178,13 @@ if (interactive()) {
       
       p <- ggplot(jdata_selected(), 
                 aes(x = Date)) +
-        geom_line(aes(y = Total, colour = factor(Category), 
-                      linetype = factor(Actuals, levels = level_test)), 
+        geom_line(aes(y = Total, 
+                      colour = factor(Category), 
+                      linetype = factor(Actuals)), 
                   size = 1) +
-        ggtitle("Time series for total Outstanding Cases by month")
+        ggtitle("Time series for total Outstanding Cases by month") +
+        theme_bw() 
+      
     
       # Add bar graph, only in the case where one item is selected from the picker
       if (length(input$picker1) == 1) {
@@ -202,7 +205,9 @@ if (interactive()) {
       # Convert ggplot object to a plotly object
       #suppressWarnings(
         # height = "550px"
-        ggplotly(p, height = 550)
+        
+        ggplotly(p, height = 550) %>%
+          layout(showlegend = FALSE)
       #)
       
     })
