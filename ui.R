@@ -86,7 +86,7 @@ ui <- dashboardPage(
       column(class = "myCol1",
         width = 8,
         div(style = "height:20px"),
-        plotlyOutput("plot")
+        withSpinner(plotlyOutput("plot"), type = getOption("spinner.type", default = 7))
       ),
     
       #tags$head(tags$style("
@@ -108,11 +108,11 @@ ui <- dashboardPage(
         # Numeric input for variable disposal rate
         numericInputIcon("numeric",
                         label = "Enter Disposal Rate:",
-                        min = 1,
-                        max = 2,
+                        min = 0.8,
+                        max = 1.5,
                         step = 0.1,
-                        value = 1.5,
-                        icon = icon("percent")
+                        value = 1.3  #,
+                        #icon = icon("percent")
         ),
         
         div(style = "height:40px", "Disposal rate for converting sitting days to disposals"),
@@ -146,6 +146,7 @@ ui <- dashboardPage(
              
       ),
       
+      # Replace this in css script when i know how
       tags$head(tags$style("
         .myCol2{height:650px;background-color: LightBlue;}")
       ),

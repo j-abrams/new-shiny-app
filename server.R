@@ -72,23 +72,74 @@ if (interactive()) {
 
       # This refreshes twice when called, once to update the slider, once to update plot
       # Investigate how to use isolate to counter this
-      
-      new_limits <- vals$jdata %>%
-        # Filter for actuals or projections based on contents of checkbox
-        filter(Actuals %in% input$checkbox1)
-
-      min <- as.Date(min(new_limits$Date), format = "%b-%y")
-      max <- as.Date(max(new_limits$Date), format = "%b-%y")
-      
-      #freezeReactiveValue(input, "slider1")
-      
-      updateSliderInput(session, "slider1",
-                        min = min,
-                        max = max,
-                        value = c(min, max),
-                        timeFormat = "%b-%y")
+      isolate({
+        new_limits <- vals$jdata %>%
+          # Filter for actuals or projections based on contents of checkbox
+          filter(Actuals %in% input$checkbox1)
+        
+  
+        min <- as.Date(min(new_limits$Date), format = "%b-%y")
+        max <- as.Date(max(new_limits$Date), format = "%b-%y")
+        
+        # use freeze react to force an error / warning
+        
+        freezeReactiveValue(input, "slider1")
+        
+        updateSliderInput(session, "slider1",
+                          min = min,
+                          max = max,
+                          value = c(min, max),
+                          timeFormat = "%b-%y")
+      })
 
     }, ignoreNULL = T )
+    
+    
+    
+    observeEvent(input$radio1, {
+      
+      
+      if (input$radio1 == "Worst") {
+      
+        #input$numeric <- 0.8
+        
+        updateNumericInputIcon(
+          inputId = "numeric",
+          value = 0.8
+        )  
+        
+        updateKnobInput(
+          inputId = "knob1",
+          value = 15
+        )
+      }
+      
+      if (input$radio1 == "Medium") {
+        updateNumericInputIcon(
+          inputId = "numeric",
+          value = 1.3
+        )  
+        
+        updateKnobInput(
+          inputId = "knob1",
+          value = 0
+        )
+      }
+      
+      if (input$radio1 == "Best") {
+        updateNumericInputIcon(
+          inputId = "numeric",
+          value = 1.5
+        )  
+        
+        updateKnobInput(
+          inputId = "knob1",
+          value = 10
+        )
+      }
+      
+      
+    })
     
     
     
@@ -180,41 +231,51 @@ if (interactive()) {
       req(length(input$checkbox1) > 0)
       
       
+      
+      tryCatch({
+      
+      
       #print(factor(jdata_selected()$Actuals, levels = level_test))
       
       # Line graph
       
-      p <- ggplot(jdata_selected(), 
-                aes(x = Date)) +
-        geom_line(aes(y = Total, 
-                      colour = factor(Category), 
-                      linetype = factor(Actuals)), 
-                  size = 1) +
-        ggtitle("Time series for total Outstanding Cases by month") +
-        theme_bw() 
+        p <- ggplot(jdata_selected(), 
+                  aes(x = Date)) +
+          geom_line(aes(y = Total, 
+                        colour = factor(Category), 
+                        linetype = factor(Actuals)), 
+                    size = 1) +
+          ggtitle("Time series for total Outstanding Cases by month") +
+          theme_bw() 
+        
       
-    
-      # Add bar graph, only in the case where one item is selected from the picker
-      if (length(input$picker1) == 1) {
-        if (nrow(jdata_selected() %>% filter(Actuals == "Actual")) > 0 ) {
-          p <- p +
-            geom_bar(aes(y = Total2), stat = "identity", fill = "cadetblue")
+        # Add bar graph, only in the case where one item is selected from the picker
+        if (length(input$picker1) == 1) {
+          if (nrow(jdata_selected() %>% filter(Actuals == "Actual")) > 0 ) {
+            p <- p +
+              geom_bar(aes(y = Total2), stat = "identity", fill = "cadetblue")
+          }
+          
+          if ("Projection" %in% jdata_selected()$Actuals & 
+              input$picker1 == "OutstandingCases") {
+            p <- p +
+              geom_line(aes(y = `Upper Interval`), color = "cornflowerblue", linetype = "dashed") +
+              geom_line(aes(y = `Lower Interval`), color = "cornflowerblue", linetype = "dashed")
+          }
         }
         
-        if ("Projection" %in% jdata_selected()$Actuals & 
-            input$picker1 == "OutstandingCases") {
-          p <- p +
-            geom_line(aes(y = `Upper Interval`), color = "cornflowerblue", linetype = "dashed") +
-            geom_line(aes(y = `Lower Interval`), color = "cornflowerblue", linetype = "dashed")
-        }
-      }
       
-      
-      
+      #req(typeof(p) == "vector" )
       # Convert ggplot object to a plotly object
       #suppressWarnings(
-      ggplotly(p, height = 550) %>%
-        layout(showlegend = FALSE)
+      
+      
+        ggplotly(p, height = 550) %>%
+          layout(showlegend = FALSE)
+        
+      },
+      error = function(e) {} )  
+      
       #)
       
     })
@@ -225,15 +286,21 @@ if (interactive()) {
       
       req(input$hot)
       
-      vals$jdata %>%
-        # Filter for actuals or projections based on contents of checkbox
-        filter(Actuals %in% input$checkbox1) %>%
-        # Use floor date to filter on Date
-        filter(Date >= floor_date(input$slider1[1], unit = "months") &
-                 Date <= floor_date(input$slider1[2], unit = "months")) %>%
-        dplyr::relocate(Actuals, .after = last_col()) %>%
-        mutate(Date = format(Date, "%b-%y"))
+      tryCatch({
       
+        vals$jdata %>%
+          # Filter for actuals or projections based on contents of checkbox
+          filter(Actuals %in% input$checkbox1) %>%
+          # Use floor date to filter on Date
+          filter(Date >= floor_date(input$slider1[1], unit = "months") &
+                   Date <= floor_date(input$slider1[2], unit = "months")) %>%
+          dplyr::relocate(Actuals, .after = last_col()) %>%
+          mutate(Date = format(Date, "%b-%y"))
+      
+      },
+      # add code to run if error here if you wish
+      error = function(e) {} )  
+        
     })
     
   }

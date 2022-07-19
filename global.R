@@ -16,6 +16,10 @@
 
 #renv::install("rlang")
 
+#renv::install("shinycssloaders")
+
+library(shinycssloaders)
+
 library(rlang)
 
 library(reactlog)
