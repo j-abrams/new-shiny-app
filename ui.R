@@ -23,6 +23,9 @@ ui <- dashboardPage(
   
   ## Body ----
   dashboardBody(
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet.css")
+    ),
     fluidRow(
       # Header
       headerPanel("HMCTS Dashboard Modelling - Receipts, Disposals & Outstanding Cases"),
@@ -68,18 +71,15 @@ ui <- dashboardPage(
         
         div(style = "height:40px", "Use dropdown to decide which variable / variables to plot"),
         
-        knobInput(
-          inputId = "knob1",
-          label = "Confidence Interval",
-          value = 10, min = 0, max = 20,
-          height = "85px",
-          #height = "95px",
-          #angleArc = 180, angleOffset = 270,
-          fgColor = "cornflowerblue",
-          post = "%"
+        prettyRadioButtons(
+          inputId = "radio1",
+          label = "Scenario Selecions",
+          choices = c("Best", "Medium", "Worst"),
+          selected = "Medium",
+          shape = c("round", "square", "curve")
         ),
         
-        div(style = "height:40px", "Adjust confidence interval with this widget")
+        div(style = "height:40px", "Choose between Best, Worst and Medium, which scenario to display")
         
     
       ),
@@ -88,11 +88,10 @@ ui <- dashboardPage(
         div(style = "height:20px"),
         plotlyOutput("plot")
       ),
-      
-      tags$head(tags$style("
-        .myCol1{height:600px;background-color: LightPink;}")
-      ),
-      
+    
+      #tags$head(tags$style("
+      #  .myCol1{height:600px;background-color: LightPink;}")
+      #),
       
       
       column(class = "myCol2",
@@ -118,9 +117,22 @@ ui <- dashboardPage(
         
         div(style = "height:40px", "Disposal rate for converting sitting days to disposals"),
         
+        knobInput(
+          inputId = "knob1",
+          label = "Receipts Confidence Interval",
+          value = 10, min = 0, max = 20,
+          height = "85px",
+          #height = "95px",
+          #angleArc = 180, angleOffset = 270,
+          fgColor = "cornflowerblue",
+          post = "%"
+        ),
+        
+        div(style = "height:40px", "Adjust confidence interval with this widget"),
+        
         rHandsontableOutput("hot", height = "32%"),
         
-        div(style = "height:40px", "Disposal rate for converting sitting days to disposals"),
+        div(style = "height:40px", "rhandsontable where overall annual figures may be edited by the user"),
         
         downloadButton(
           "actionbutton1",
@@ -135,7 +147,7 @@ ui <- dashboardPage(
       ),
       
       tags$head(tags$style("
-        .myCol2{height:600px;background-color: LightBlue;}")
+        .myCol2{height:650px;background-color: LightBlue;}")
       ),
       
       

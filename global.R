@@ -8,10 +8,24 @@
 #renv::install("dplyr")
 #renv::install("lubridate")
 #renv::install("here")
-
 #renv::install("shinyjs")
 #renv::install("rhandsontable")
 
+#renv::install("reactlog")
+
+
+#renv::install("rlang")
+
+library(rlang)
+
+library(reactlog)
+
+reactlog::reactlog_enable()
+
+#shiny::reactlogReset()
+#shiny::reactlogShow()
+
+# Package libraries required
 library(dplyr)
 library(shiny)
 library(shinydashboard)
@@ -20,42 +34,46 @@ library(here)
 library(shinyjs)
 library(ggplot2)
 library(fontawesome)
-
 library(rhandsontable)
 library(lubridate)
-
-#library(shinycssloaders)
-#library(shinyjs)
-
-
-#renv::install("powerjoin")
+library(plotly)
 library(powerjoin)
+library(tidyr)
 
 
+
+shinyOptions(shiny.fullstacktrace = T)
+
+# Source command to pre-processing script raw_data.R
 source(here("raw_data.R"))
 
+# Launch time test
 launch_time <- format(Sys.time(), tz="Europe/London")
 
+# First day of projections
 forecast_start_date <- "2022-05-01"
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 
-
+# read in excel data from the workbook object
 sitting_days_lookup <- read_xlsx(here("Input data/monthly_share.xlsx"), sheet = "lookup")
 sitting_days_total <- read_xlsx(here("Input data/monthly_share.xlsx"), sheet = "sitting_days")
 sitting_days_df <- read_xlsx(here("Input data/monthly_share.xlsx"), sheet = "monthly_share")
 
+
+# Sitting days lookup and monthly share combined
 sd_join <- sitting_days_lookup %>%
   dplyr::rename("Period" = "Lookup") %>%
-  
   left_join(sitting_days_df, by = "Month") %>%
   filter(Month >= forecast_start_date)
   
 
 
-
-
+# ImmigrationData is defined in raw_data.R - jdata_new requires extra handling steps:
+# - Flag for actuals projections
+# - Renaming variables
+# - Creating an empty column, Sitting Days, as a placeholder
 jdata_new <- ImmigrationData %>%
   mutate(Actuals = ifelse(Date < forecast_start_date, 
                           "Actual", "Projection"),
@@ -69,8 +87,11 @@ jdata_new <- ImmigrationData %>%
   select(Date, Receipts, `Sitting Days`, Disposals, OutstandingCases, Actuals)
 
 
+# Starting point used in calculations for outstanding cases in the future
 last_outstanding_val <- jdata_new$OutstandingCases[nrow(jdata_new)]
 
+
+# didn't work, rip
 level_test <- as.factor(c("Actual", "Projection"))
 
 

@@ -9,49 +9,27 @@ if (interactive()) {
     # Initiate
     vals <- reactiveValues(jdata = jdata_new)
     
-    # Checkbox functionality for filtering
-    jdata <- reactive({
-      vals$jdata %>%
-        # Filter for actuals or projections based on contents of checkbox
-        filter(Actuals %in% input$checkbox1)
-    })
     
     # Integrate the date slider functionality
-    jdata2 <- reactive({
-      jdata() %>%
-        # Use floor date to filter on Date
-        filter(Date >= floor_date(input$slider1[1], unit = "months") &
-                 Date <= floor_date(input$slider1[2], unit = "months"))
-    })
-    
     
     # Call this function to update our reactive plot in the renderPlotly command
     jdata_selected <- reactive({
-      jdata2() %>%
+      
+      vals$jdata %>%
+        # Filter for actuals or projections based on contents of checkbox
+        filter(Actuals %in% input$checkbox1) %>%
+        # Use floor date to filter on Date
+        filter(Date >= floor_date(input$slider1[1], unit = "months") &
+                 Date <= floor_date(input$slider1[2], unit = "months")) %>%
+        dplyr::relocate(Actuals, .after = last_col()) %>%
         pivot_longer(c("Receipts", "Disposals", "OutstandingCases"),
                      names_to = "Category", values_to = "Total") %>%
         filter(Category %in% input$picker1) %>%
-        mutate(Total2 = ifelse(Actuals == "Actual", Total, NA)) %>%
-        mutate(`Upper Interval` = ifelse(Actuals == "Projection", 
-                                         Total * ((100 + input$knob1) / 100), NA)) %>%
-        mutate(`Lower Interval` = ifelse(Actuals == "Projection", 
-                                         Total * ((100 - input$knob1) / 100), NA)) 
+        mutate(Total2 = ifelse(Actuals == "Actual", Total, NA))
+      
     })
     
     
-        
-    
-    # Calculate OutstandingCases from Receipts and Sitting Days
-    jdata_update <- reactive({
-      vals$jdata %>%
-        dplyr::mutate(
-          Disposals = ifelse(Actuals == "Projection", `Sitting Days` * input$numeric, Disposals),
-          diff = ifelse(Actuals == "Projection", Receipts - Disposals,  0),
-          OutstandingCases = ifelse(Actuals == "Projection",
-                                    cumsum(diff) + last_outstanding_val, 
-                                    OutstandingCases))  %>%
-        select(-diff)
-    })
     
     
     # Define what happens when a new receipts input file is uploaded to the app
@@ -68,7 +46,7 @@ if (interactive()) {
         session, 
         "checkbox1",
         choices = c("Actual", "Projection"),
-        selected = c("Actual", "Projection"),
+        selected = c("Actual"),
         inline = T
       )
       
@@ -83,7 +61,7 @@ if (interactive()) {
         dplyr::mutate(Receipts = coalesce(Receipts.x, Receipts.y)) %>% 
         dplyr::select(names(jdata_new)) 
         
-      vals$jdata <- jdata_update()
+      #vals$jdata <- jdata_update()
 
       
     })
@@ -95,10 +73,12 @@ if (interactive()) {
       # This refreshes twice when called, once to update the slider, once to update plot
       # Investigate how to use isolate to counter this
       
-      new_limits <- jdata()$Date
+      new_limits <- vals$jdata %>%
+        # Filter for actuals or projections based on contents of checkbox
+        filter(Actuals %in% input$checkbox1)
 
-      min <- as.Date(min(new_limits), format = "%b-%y")
-      max <- as.Date(max(new_limits), format = "%b-%y")
+      min <- as.Date(min(new_limits$Date), format = "%b-%y")
+      max <- as.Date(max(new_limits$Date), format = "%b-%y")
       
       #freezeReactiveValue(input, "slider1")
       
@@ -112,24 +92,7 @@ if (interactive()) {
     
     
     
-    # Re-assign vals$jdata when input$numeric changes - 
-    # new disposal rates will result in updated Disposal figures
-    observeEvent(input$numeric, {
-      
-      req(input$file1)
-      
-      vals$jdata <- jdata_update()
-      
-    })
-    
-    # rhandsontable output - configure which cols are and are not read only
-    output$hot <- renderRHandsontable({
-      rhandsontable(sitting_days_total) %>%
-        hot_col("Period", readOnly = TRUE)
-    })
-    
-    
-    # call jdata_update() when something changes in "input$hot"
+    #call jdata_update() when something changes in "input$hot"
     observeEvent(input$hot, {
       
       #req(input$file1)
@@ -139,7 +102,7 @@ if (interactive()) {
         right_join(sd_join, by = "Period") %>%
         dplyr::mutate(`Sitting Days` = `Total Sitting Days` * `Monthly share pa`) %>%
         select(Date = Month, `Sitting Days`) #%>%
-        #filter(Date <= "2023-01-01")
+      #filter(Date <= "2023-01-01")
       
       # power_full_join : A full and right join rolled into one
       vals$jdata <- vals$jdata %>%
@@ -147,18 +110,63 @@ if (interactive()) {
         mutate(Actuals = ifelse(Date < forecast_start_date, Actuals, "Projection")) %>%
         arrange(Date) %>%
         select(names(jdata_new))
-        
-      vals$jdata <- jdata_update()
+      
+      #vals$jdata <- jdata_update()
       
     })
     
     
+    
+    # Re-assign vals$jdata when input$numeric changes - 
+    # new disposal rates will result in updated Disposal figures
+    # Re-assign when input$knob1 changes also
+    
+    observe({
+      
+      vals$jdata <- vals$jdata %>%
+        dplyr::mutate(
+          Disposals = ifelse(Actuals == "Projection", `Sitting Days` * input$numeric, Disposals),
+          diff = ifelse(Actuals == "Projection", Receipts - Disposals,  0),
+          OutstandingCases = ifelse(Actuals == "Projection",
+                                    cumsum(diff) + last_outstanding_val, 
+                                    OutstandingCases)) %>%
+        select(-diff)  %>% 
+        
+        mutate(`Upper Receipts` = ifelse(Actuals == "Projection", 
+                                         Receipts * ((100 + input$knob1) / 100), NA)) %>%
+        mutate(`Lower Receipts` = ifelse(Actuals == "Projection", 
+                                         Receipts * ((100 - input$knob1) / 100), NA)) %>%
+        mutate(diff1 = ifelse(Actuals == "Projection", `Upper Receipts` - Disposals,  0)) %>%
+        mutate(`Upper Interval` = ifelse(Actuals == "Projection",
+                                         cumsum(diff1) + last_outstanding_val, 
+                                         NA)) %>%
+        mutate(diff2 = ifelse(Actuals == "Projection", `Lower Receipts` - Disposals,  0)) %>%
+        mutate(`Lower Interval` = ifelse(Actuals == "Projection",
+                                         cumsum(diff2) + last_outstanding_val, 
+                                         NA)) %>%
+        select(-c(diff1, diff2, `Upper Receipts`, `Lower Receipts`))
+      
+    })
+
+    
+    
+    # rhandsontable output - configure which cols are and are not read only
+    output$hot <- renderRHandsontable({
+      rhandsontable(sitting_days_total) %>%
+        hot_col("Period", readOnly = TRUE)
+    })
+    
+    
+    # Export vals$jdata with the download button
     output$actionbutton1 <- downloadHandler(
       filename = function() {
         paste("data-", Sys.Date(), ".csv", sep="")
       },
       content = function(file) {
-        write.csv(vals$jdata, file)
+        write.csv(
+          vals$jdata %>%
+            mutate(`Disposal Rate` = input$numeric), 
+          file)
       }
     )
     
@@ -193,7 +201,8 @@ if (interactive()) {
             geom_bar(aes(y = Total2), stat = "identity", fill = "cadetblue")
         }
         
-        if ("Projection" %in% jdata_selected()$Actuals) {
+        if ("Projection" %in% jdata_selected()$Actuals & 
+            input$picker1 == "OutstandingCases") {
           p <- p +
             geom_line(aes(y = `Upper Interval`), color = "cornflowerblue", linetype = "dashed") +
             geom_line(aes(y = `Lower Interval`), color = "cornflowerblue", linetype = "dashed")
@@ -204,10 +213,8 @@ if (interactive()) {
       
       # Convert ggplot object to a plotly object
       #suppressWarnings(
-        # height = "550px"
-        
-        ggplotly(p, height = 550) %>%
-          layout(showlegend = FALSE)
+      ggplotly(p, height = 550) %>%
+        layout(showlegend = FALSE)
       #)
       
     })
@@ -218,7 +225,13 @@ if (interactive()) {
       
       req(input$hot)
       
-      jdata2() %>%
+      vals$jdata %>%
+        # Filter for actuals or projections based on contents of checkbox
+        filter(Actuals %in% input$checkbox1) %>%
+        # Use floor date to filter on Date
+        filter(Date >= floor_date(input$slider1[1], unit = "months") &
+                 Date <= floor_date(input$slider1[2], unit = "months")) %>%
+        dplyr::relocate(Actuals, .after = last_col()) %>%
         mutate(Date = format(Date, "%b-%y"))
       
     })
