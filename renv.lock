@@ -656,6 +656,16 @@
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d",
       "Requirements": []
     },
+    "reactlog": {
+      "Package": "reactlog",
+      "Version": "1.1.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5a30d3b8883107ae07c2137a33c000b2",
+      "Requirements": [
+        "jsonlite"
+      ]
+    },
     "readxl": {
       "Package": "readxl",
       "Version": "1.4.0",
@@ -785,6 +795,18 @@
         "jsonlite",
         "rlang",
         "sass",
+        "shiny"
+      ]
+    },
+    "shinycssloaders": {
+      "Package": "shinycssloaders",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f39bb3c44a9b496723ec7e86f9a771d8",
+      "Requirements": [
+        "digest",
+        "glue",
         "shiny"
       ]
     },
