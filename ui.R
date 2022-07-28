@@ -5,7 +5,7 @@
 
 ui <- dashboardPage(
   
-  dashboardHeader(title = "Basic dashboard"),
+  dashboardHeader(title = "HMCTS dashboard"),
   
   #### Sidebar ----
   dashboardSidebar(
@@ -28,7 +28,7 @@ ui <- dashboardPage(
     ),
     fluidRow(
       # Header
-      headerPanel("HMCTS Dashboard Modelling - Receipts, Disposals & Outstanding Cases"),
+      headerPanel("HMCTS Dashboard Stock Flow Modelling - Receipts, Disposals & Outstanding Cases"),
       div(style = "height:100px")),
     
     fluidRow(
@@ -148,7 +148,7 @@ ui <- dashboardPage(
       
       # Replace this in css script when i know how
       tags$head(tags$style("
-        .myCol2{height:650px;background-color: LightBlue;}")
+        .myCol2{height:850px;background-color: LightBlue;}")
       ),
       
       
