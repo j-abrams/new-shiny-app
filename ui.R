@@ -120,7 +120,7 @@ ui <- dashboardPage(
         knobInput(
           inputId = "knob1",
           label = "Receipts Confidence Interval",
-          value = 10, min = 0, max = 20,
+          value = 0, min = 0, max = 20,
           height = "85px",
           #height = "95px",
           #angleArc = 180, angleOffset = 270,
@@ -147,9 +147,9 @@ ui <- dashboardPage(
       ),
       
       # Replace this in css script when i know how
-      tags$head(tags$style("
-        .myCol2{height:900px;background-color: LightBlue;}")
-      ),
+      #tags$head(tags$style("
+      #  .myCol2{height:900px;background-color: LightBlue;}")
+      #),
       
       
       column(width = 8,
