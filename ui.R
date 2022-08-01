@@ -148,7 +148,7 @@ ui <- dashboardPage(
       
       # Replace this in css script when i know how
       tags$head(tags$style("
-        .myCol2{height:850px;background-color: LightBlue;}")
+        .myCol2{height:900px;background-color: LightBlue;}")
       ),
       
       

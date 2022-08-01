@@ -2,32 +2,7 @@
 
 
 
-#renv::install("shiny")
-#renv::install("shinydashboard")
-#renv::install("shinyWidgets")
-#renv::install("dplyr")
-#renv::install("lubridate")
-#renv::install("here")
-#renv::install("shinyjs")
-#renv::install("rhandsontable")
 
-#renv::install("reactlog")
-
-
-#renv::install("rlang")
-
-#renv::install("shinycssloaders")
-
-library(shinycssloaders)
-
-library(rlang)
-
-library(reactlog)
-
-reactlog::reactlog_enable()
-
-#shiny::reactlogReset()
-#shiny::reactlogShow()
 
 # Package libraries required
 library(dplyr)
@@ -43,10 +18,20 @@ library(lubridate)
 library(plotly)
 library(powerjoin)
 library(tidyr)
+library(shinycssloaders)
+library(rlang)
+library(reactlog)
 
+
+
+reactlog::reactlog_enable()
+
+#shiny::reactlogReset()
+#shiny::reactlogShow()
 
 
 shinyOptions(shiny.fullstacktrace = T)
+
 
 # Source command to pre-processing script raw_data.R
 source(here("raw_data.R"))
