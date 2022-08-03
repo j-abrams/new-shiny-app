@@ -29,6 +29,19 @@ if (interactive()) {
       
     })
     
+    jdata_filtered <- reactive({
+      
+      vals$jdata %>%
+        # Filter for actuals or projections based on contents of checkbox
+        filter(Actuals %in% input$checkbox1) %>%
+        # Use floor date to filter on Date
+        filter(Date >= floor_date(input$slider1[1], unit = "months") &
+                 Date <= floor_date(input$slider1[2], unit = "months")) %>%
+        dplyr::relocate(Actuals, .after = last_col()) %>%
+        mutate(Date = format(Date, "%b-%y"))
+      
+    })
+    
     
     
     
@@ -278,7 +291,9 @@ if (interactive()) {
       
       
         ggplotly(p, height = 550) %>%
-          layout(showlegend = FALSE)
+          layout(showlegend = FALSE,
+                 paper_bgcolor = '#fff896',
+                 plot_bgcolor  = '#fffbc4')
         
       },
       error = function(e) {} )  
@@ -295,14 +310,7 @@ if (interactive()) {
       
       tryCatch({
       
-        vals$jdata %>%
-          # Filter for actuals or projections based on contents of checkbox
-          filter(Actuals %in% input$checkbox1) %>%
-          # Use floor date to filter on Date
-          filter(Date >= floor_date(input$slider1[1], unit = "months") &
-                   Date <= floor_date(input$slider1[2], unit = "months")) %>%
-          dplyr::relocate(Actuals, .after = last_col()) %>%
-          mutate(Date = format(Date, "%b-%y"))
+        jdata_filtered()
       
       },
       # add code to run if error here if you wish
@@ -310,9 +318,32 @@ if (interactive()) {
         
     })
     
+    observeEvent(input$text_input, {
+
+      output$table <- renderTable({
+
+        req(input$hot)
+
+        text <- as.character(input$text_input)
+
+        tryCatch({
+
+          jdata_filtered() %>%
+            filter_all(any_vars(grepl(str_to_upper(text), str_to_upper(.))))
+
+
+        },
+        # add code to run if error here if you wish
+        error = function(e) {} )
+
+
+      })
+      
+  
+    }, ignoreInit = T)
+    
   }
 
 }
-
 
 

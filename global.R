@@ -86,6 +86,19 @@ level_test <- as.factor(c("Actual", "Projection"))
 
 
 
+incrementButton <- function(inputId, value = 0) {
+  tagList(
+    singleton(tags$head(tags$script(src = "js/increment.js"))),
+    tags$button(id = inputId,
+                class = "increment btn btn-default",
+                type = "button",
+                as.character(value))
+  )
+}
+
+
+
+
 
 
 # archive
@@ -114,6 +127,10 @@ level_test <- as.factor(c("Actual", "Projection"))
 # +- 10%
 # Best case: Low receipts and High disp rate
 # Worst case: inverse
+
+
+
+
 
 
 

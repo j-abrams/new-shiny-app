@@ -1,5 +1,12 @@
 
 
+
+.content {
+    overflow: visible;
+    background-color: #cbecd2;
+}
+
+
 .myCol1 {
   background-color: #ffb6c1 ;
   height: 600px ;
@@ -22,7 +29,7 @@
 }
 
 .svg-container:hover {
-    box-shadow: -10px 10px 50px 20px #3ea3b3;
+    box-shadow: -10px 10px 50px 40px #3ea3b3;
 }
 
 
@@ -53,16 +60,72 @@
 
 
 .shiny-input-container:hover {
-    background-color: #d5b5ff;
+    box-shadow: 10px 10px 10px 10px #c73b21;
     transition: 1s;
 }
+
+
+.btn-default {
+    background-color: #eeb1ea;
+}
+
+.btn-default:hover {
+    background-color: #eeb1ea;
+}
+
+#actionbutton1:hover {
+  box-shadow: 10px 10px 10px 10px #c73b21;
+  transition: 1s;
+}
+
+
+
 
 
 .ht_master .wtHolder {
     overflow: hidden;
 }
+
 .handsontable {
     overflow: hidden;
 }
+
+
+
+
+
+
+
+#text_input {
+  background-image: url(https://www.iconpacks.net/icons/2/free-search-icon-3076-thumb.png);
+  background-color: #f5f2d2;
+  background-position: 10px 10px;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+#text_input:hover {
+  background-image: url(https://www.iconpacks.net/icons/2/free-search-icon-3076-thumb.png);
+  background-color: #f5f2d2;
+  background-position: 10px 10px;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  box-shadow: 10px 10px 10px 10px #c73b21;
+  transition: 1s;
+}
+
+
 
 

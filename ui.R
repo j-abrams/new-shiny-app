@@ -153,7 +153,18 @@ ui <- dashboardPage(
       
       
       column(width = 8,
+             
+        incrementButton("test"),
+        
+        tags$div(),
+        tags$input(
+          type = "text",
+          id = "text_input",
+          placeholder = "Filter..."
+        ),
+          
         tableOutput("table")
+        
       )
     )
   )
