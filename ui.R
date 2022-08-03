@@ -83,7 +83,7 @@ ui <- dashboardPage(
         
     
       ),
-      column(class = "myCol1",
+      column(class = "myCol2",
         width = 8,
         div(style = "height:20px"),
         withSpinner(plotlyOutput("plot"), type = getOption("spinner.type", default = 7))
@@ -94,7 +94,7 @@ ui <- dashboardPage(
       #),
       
       
-      column(class = "myCol2",
+      column(class = "myCol3",
         width = 4,
         fileInput("file1", 
                  label = h3("Upload Receipts Projections"),

@@ -1,13 +1,68 @@
 
 
 .myCol1 {
-  background-color: #add8e6 ;
+  background-color: #ffb6c1 ;
+  height: 600px ;
+  }
+  
+.myCol2 {
+  background-color: #ffb6c1 ;
   height: 600px ;
   }
 
-.myCol2 {
-  background-color: #ffb6c1 ;
+.myCol3 {
+  background-color: #add8e6 ;
   height: 900px ;
   }
+
+
+.svg-container {
+    box-shadow: -5px 5px 20px 10px #3ea3b3;
+    transition: 1s;
+}
+
+.svg-container:hover {
+    box-shadow: -10px 10px 50px 20px #3ea3b3;
+}
+
+
+.pretty.p-default input:checked~.state label:after {
+    background-color: #1786c7!important;
+}
+
+.pretty .state label:after, .pretty .state label:before {
+    content: '';
+    width: calc(1em + 2px);
+    height: calc(1em + 2px);
+    display: block;
+    box-sizing: border-box;
+    border-radius: 0;
+    border: 1px solid #333;
+    z-index: 0;
+    position: absolute;
+    left: 0;
+    top: calc((0% - (100% - 1em)) - 8%);
+    background-color: #f4f4f4;
+}
+
+
+.shiny-input-container:not(:hover) {
+  background-color: auto;
+    transition: 1s;
+}
+
+
+.shiny-input-container:hover {
+    background-color: #d5b5ff;
+    transition: 1s;
+}
+
+
+.ht_master .wtHolder {
+    overflow: hidden;
+}
+.handsontable {
+    overflow: hidden;
+}
 
 

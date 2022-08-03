@@ -241,12 +241,10 @@ if (interactive()) {
       
         data <- jdata_selected()
         
+        # Fix factor prior to plotting to fix hovering / legend labels
         data$Category <- factor(data$Category, levels = levels(as.factor(data$Category)))
         data$Actuals <- factor(data$Actuals, levels = levels(as.factor(data$Actuals)))
         
-        
-        #print(as.factor(data$Category))
-        print(levels(as.factor(data$Category)))
         
         p <- ggplot(data, 
                   aes(x = Date)) +
