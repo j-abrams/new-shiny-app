@@ -30,6 +30,9 @@
 
 .svg-container:hover {
     box-shadow: -10px 10px 50px 40px #3ea3b3;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 
@@ -62,6 +65,9 @@
 .shiny-input-container:hover {
     box-shadow: 10px 10px 10px 10px #c73b21;
     transition: 1s;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 
@@ -76,6 +82,17 @@
 #actionbutton1:hover {
   box-shadow: 10px 10px 10px 10px #c73b21;
   transition: 1s;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+#checkbox1 {
+  width: 60%;
+}
+
+#knob1 {
+  height: 80px;
 }
 
 
@@ -122,10 +139,32 @@
   border: 1px solid #ddd;
   margin-bottom: 12px;
   text-transform: uppercase;
-  box-shadow: 10px 10px 10px 10px #c73b21;
+  box-shadow: -10px 10px 10px 10px #c73b21;
   transition: 1s;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 
 
+
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
 

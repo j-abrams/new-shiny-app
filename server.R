@@ -306,7 +306,7 @@ if (interactive()) {
     # renderTable - updates dynamically 
     output$table <- renderTable({
       
-      req(input$hot)
+      #req(input$hot)
       
       tryCatch({
       
@@ -320,16 +320,16 @@ if (interactive()) {
     
     observeEvent(input$text_input, {
 
+      text <- as.character(input$text_input)
+      
       output$table <- renderTable({
-
-        req(input$hot)
-
-        text <- as.character(input$text_input)
 
         tryCatch({
 
           jdata_filtered() %>%
-            filter_all(any_vars(grepl(str_to_upper(text), str_to_upper(.))))
+            dplyr::filter_all(
+              any_vars(grepl(str_to_upper(text), str_to_upper(.)))
+            )
 
 
         },

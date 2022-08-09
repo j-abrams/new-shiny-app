@@ -121,18 +121,18 @@ ui <- dashboardPage(
           inputId = "knob1",
           label = "Receipts Confidence Interval",
           value = 0, min = 0, max = 20,
-          height = "85px",
-          #height = "95px",
-          #angleArc = 180, angleOffset = 270,
+          #height = "85px",
+          height = "80px",
+          angleArc = 180, angleOffset = 270,
           fgColor = "cornflowerblue",
           post = "%"
         ),
         
         div(style = "height:40px", "Adjust confidence interval with this widget"),
         
-        rHandsontableOutput("hot", height = "32%"),
+        rHandsontableOutput("hot", height = "25%"),
         
-        div(style = "height:40px", "rhandsontable where overall annual figures may be edited by the user"),
+        div(style = "height:60px", "rhandsontable where overall annual figures may be edited by the user"),
         
         downloadButton(
           "actionbutton1",
@@ -157,6 +157,14 @@ ui <- dashboardPage(
         incrementButton("test"),
         
         tags$div(),
+        
+        tags$div(title="Click here to slide through years",
+                 sliderInput("slider_year", "YEAR:", 
+                             min = 2001, max = 2011, value = 2009, 
+                             format="####", locale="us"
+                 )
+        ),
+        
         tags$input(
           type = "text",
           id = "text_input",

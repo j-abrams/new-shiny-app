@@ -21,7 +21,7 @@ library(tidyr)
 library(shinycssloaders)
 library(rlang)
 library(reactlog)
-
+library(stringr)
 
 
 reactlog::reactlog_enable()
